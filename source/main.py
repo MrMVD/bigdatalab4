@@ -22,13 +22,9 @@ division_indexer = StringIndexer(inputCol="Division", outputCol="DivisionIndex")
 department_indexer = StringIndexer(inputCol="Department_Name", outputCol="DepartmentIndex")
 gender_indexer = StringIndexer(inputCol="Gender", outputCol="GenderIndex")
 
-# В числа
-division_encoder = OneHotEncoder(inputCol="DivisionIndex", outputCol="DivisionVec")
-department_encoder = OneHotEncoder(inputCol="DepartmentIndex", outputCol="DepartmentVec")
-
 # Вектор признаков
 assembler = VectorAssembler(
-    inputCols=["DivisionVec","DepartmentVec", "GenderIndex"], 
+    inputCols=["DivisionIndex","DepartmentIndex", "GenderIndex"], 
     outputCol="Features"
 )
 
@@ -38,9 +34,7 @@ scaler = StandardScaler(inputCol="Features", outputCol="ScaledFeatures")
 preprocessing_pipeline = Pipeline(stages=[
     division_indexer,
     department_indexer, 
-    gender_indexer, 
-    division_encoder,
-    department_encoder, 
+    gender_indexer,
     assembler, 
     scaler
 ])
@@ -67,6 +61,9 @@ evaluator = MulticlassClassificationEvaluator(
 
 accuracy = evaluator.evaluate(predictions)
 print(f"Test Accuracy: {accuracy * 100:.2f}%")
+
+# Feature Importance
+print("Feature Importances:", rf_model.featureImportances)
 
 # Остановка спарка
 spark.stop()
